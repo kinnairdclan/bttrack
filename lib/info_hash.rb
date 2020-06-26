@@ -10,10 +10,10 @@ class InfoHash
   def announce compact, no_peer_id, numwant
     peer_list = store.get_peers(numwant).map do |peer_id, peer|
       if compact
-        [IPAddr.new(peer[:ip]).to_i, peer[:port].to_i].pack('Nn')
+        [IPAddr.new(peer['ip']).to_i, peer['port'].to_i].pack('Nn')
       else
-        {'ip' => peer[:ip], 'port' => peer[:port].to_i}.tap do |data|
-          data['peer id'] = peer_id unless no_peer_id
+        {'ip' => peer['ip'], 'port' => peer['port'].to_i}.tap do |data|
+          data['peer id'] = [peer_id].pack('H*') unless no_peer_id
         end
       end
     end
