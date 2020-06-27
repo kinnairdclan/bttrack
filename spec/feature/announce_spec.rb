@@ -124,7 +124,7 @@ describe "GET /announce" do
       it "deletes file if empty" do
         expect {
           get '/announce', args.merge(event: 'stopped')
-        }.to change { store.file_path.exist? }.to false
+        }.to change { store.persisted? }.to eq(false)
       end
     end
 
@@ -143,8 +143,8 @@ describe "GET /announce" do
         get '/announce', args.merge(event: 'started', left: 512)
       }.to change { store.get_peers.size }.by(1)
       peer = store.get_peer peer_id
-      expect(peer).to include ip: '127.0.0.1', port: 6881
-      expect(peer).to include downloaded: 0, uploaded: 0, left: 512
+      expect(peer).to include 'ip' => '127.0.0.1', 'port' => 6881
+      expect(peer).to include 'downloaded' => 0, 'uploaded' => 0, 'left' => 512
     end
 
     it "updates peer entry" do
@@ -153,8 +153,8 @@ describe "GET /announce" do
         get '/announce', args.merge(event: 'completed', downloaded: 512)
       }.to change { store.get_peers.size }.by(0)
       peer = store.get_peer peer_id
-      expect(peer).to include ip: '127.0.0.1', port: 6881
-      expect(peer).to include downloaded: 512, uploaded: 0, left: 0
+      expect(peer).to include 'ip' => '127.0.0.1', 'port' => 6881
+      expect(peer).to include 'downloaded' => 512, 'uploaded' => 0, 'left' => 0
     end
   end
 end

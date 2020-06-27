@@ -35,7 +35,7 @@ class InfoHash
 
   # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
   def scrape
-    defaults = {downloaded: 0, complete: 0, incomplete: 0}
+    defaults = {'downloaded' => 0, 'complete' => 0, 'incomplete' => 0}
     {:files => { @id => defaults.merge(store.get_stats) }}
   end
 
@@ -49,7 +49,7 @@ class InfoHash
 
   # scrape for all torrents
   def self.scrape
-    defaults = {downloaded: 0, complete: 0, incomplete: 0}
+    defaults = {'downloaded' => 0, 'complete' => 0, 'incomplete' => 0}
     {:files => InfoHash.all.each_with_object({}) do |info_hash, stats|
       stats[info_hash] = defaults.merge(FileStore.new(info_hash).get_stats)
     end}

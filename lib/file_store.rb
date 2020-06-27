@@ -8,7 +8,8 @@ class FileStore
   attr_reader :info_hash
 
   def initialize info_hash
-    @info_hash = info_hash
+    #@info_hash = info_hash
+    @info_hash = info_hash.unpack('H*').first
   end
 
   # Set or update peer's data
@@ -18,13 +19,12 @@ class FileStore
     #  store[:peers][peer_id] = data.merge(expires_at: Time.now + CONF[:announce_interval] * 2)
     #end
     peer_id = peer_id.unpack('H*').first
-    info_hash = @info_hash.unpack('H*').first
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     store['peers'] ||= '{}'
     store['peers'] = JSON.parse(store['peers'])
     store['peers'][peer_id] = data.merge('expires_at' => Time.now + CONF[:announce_interval] * 2)
-    redis.hset(info_hash, 'peers', store['peers'].to_json)
+    redis.hset(@info_hash, 'peers', store['peers'].to_json)
 
     clean_and_denorm!
   end
@@ -37,13 +37,12 @@ class FileStore
     #clean_and_denorm!
   #rescue PStore::Error
     peer_id = peer_id.unpack('H*').first
-    info_hash = @info_hash.unpack('H*').first
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     store['peers'] ||= '{}'
     store['peers'] = JSON.parse(store['peers'])
     store['peers'].delete peer_id
-    redis.hset(info_hash, 'peers', store['peers'].to_json)
+    redis.hset(@info_hash, 'peers', store['peers'].to_json)
 
     clean_and_denorm!
   end
@@ -53,9 +52,9 @@ class FileStore
     #PStore.new(file_path).transaction(true) do |store|
     #  (store[:peers] || {})[peer_id]
     #end
-    info_hash = @info_hash.unpack('H*').first
+    peer_id = peer_id.unpack('H*').first
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     store['peers'] ||= '{}'
     JSON.parse(store['peers'])[peer_id]
   end
@@ -67,12 +66,11 @@ class FileStore
     #  peers = Hash[peers.to_a[0...limit]] if limit
     #  peers
     #end
-    info_hash = @info_hash.unpack('H*').first
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     store['peers'] ||= '{}'
     store['peers'] = JSON.parse(store['peers'])
-    peers = Hash[store['peers'].to_a[0...limit]] if limit
+    peers = (limit ? Hash[store['peers'].to_a[0...limit]] : store['peers'])
     peers
   end
 
@@ -81,11 +79,11 @@ class FileStore
     #PStore.new(file_path).transaction(true) do |store|
     #  store[:stats] || {}
     #end
-    info_hash = @info_hash.unpack('H*').first
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     store['stats'] ||= '{}'
-    JSON.parse(store['stats'])
+    store['stats'] = JSON.parse(store['stats'])
+    store['stats']
   end
 
   # returns path to the database file
@@ -102,6 +100,11 @@ class FileStore
     redis.flushdb
   end
 
+  def persisted?
+    redis = Redis.new
+    redis.keys.include?(@info_hash)
+  end
+
   private
 
   def clean_and_denorm!
@@ -116,10 +119,9 @@ class FileStore
     #    0
     #  end
     #end
-    info_hash = @info_hash.unpack('H*').first
     count = 0
     redis = Redis.new
-    store = redis.hgetall(info_hash)
+    store = redis.hgetall(@info_hash)
     if peers = store['peers']
       peers = JSON.parse(peers)
       peers.delete_if { |id, peer| Time.parse(peer['expires_at']) < Time.now }
@@ -127,11 +129,13 @@ class FileStore
       store['stats'] = JSON.parse(store['stats'])
       store['stats']['complete'] = peers.count { |_, p| p['left'].to_i == 0 }
       store['stats']['incomplete'] = peers.count { |_, p| p['left'].to_i != 0 }
+      redis.hset(@info_hash, 'stats', store['stats'].to_json)
+      redis.hset(@info_hash, 'peers', peers.to_json)
       count = peers.size
     else
       count = 0
     end
     #file_path.delete if count == 0
-    redis.del(info_hash) if count == 0
+    redis.del(@info_hash) if count == 0
   end
 end
