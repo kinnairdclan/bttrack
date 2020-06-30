@@ -4,7 +4,7 @@
 require 'securerandom'
 require './bttrack'
 
-FileStore.purge!
+PeerStore.purge!
 
 20.times do
   info_hash = InfoHash.new SecureRandom.random_bytes(20)

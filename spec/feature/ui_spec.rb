@@ -10,8 +10,8 @@ describe "GET /" do
   end
 
   it "shows torrent details table" do
-    FileStore.new("info_hash_abcdefghij").set_peer "abcd", left: 9876
-    FileStore.new("info_hash_1234567890").set_peer "abcd", {}
+    PeerStore.new("info_hash_abcdefghij").set_peer "abcd", left: 9876
+    PeerStore.new("info_hash_1234567890").set_peer "abcd", {}
     get '/'
     expect(last_response).to be_ok
     expect(last_response.body).to include "Torrents (2)"
@@ -27,7 +27,7 @@ end
 describe "GET /:info_hash" do
   let(:info_hash) { "info_hash_abcdefghij" }
   let(:hex_info_hash) { info_hash.unpack('H*')[0] }
-  let(:store) { FileStore.new(info_hash) }
+  let(:store) { PeerStore.new(info_hash) }
   subject { get "/#{hex_info_hash}" }
 
   it "fails if info_hash is invalid" do

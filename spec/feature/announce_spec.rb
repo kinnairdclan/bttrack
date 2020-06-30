@@ -6,7 +6,7 @@ describe "GET /announce" do
   let(:peer_id) { "peer_id_5q27wml14wai" }
   let(:args) { {info_hash: info_hash, peer_id: peer_id, port: 6881} }
   let(:response) { BEncode.load(last_response.body) }
-  let(:store) { FileStore.new(info_hash) }
+  let(:store) { PeerStore.new(info_hash) }
 
   describe "error handling" do
     it "fails if info_hash is missing" do
@@ -64,7 +64,7 @@ describe "GET /announce" do
       get '/announce', args
       expect(last_response).to be_ok
       # TODO: content type text
-      expect(response).to include('interval' => 600)
+      expect(response).to include('interval' => 120)
       expect(response).to include('min interval' => 60)
       expect(response['peers'].size).to eq(3)
       expect(response).to include('peers' => [

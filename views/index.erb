@@ -12,7 +12,7 @@
   </thead>
   <tbody>
     <% @torrents.each do |torrent| %>
-      <% store = FileStore.new torrent %>
+      <% store = PeerStore.new torrent %>
       <tr>
         <td>
           <code><a href="/<%= torrent.unpack('H*')[0] %>">

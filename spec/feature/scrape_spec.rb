@@ -4,7 +4,7 @@ require 'spec_helper'
 describe "GET /scrape" do
   let(:info_hash) { "info_hash_abcdefghij" }
   let(:response) { BEncode.load(last_response.body) }
-  let(:store) { FileStore.new(info_hash) }
+  let(:store) { PeerStore.new(info_hash) }
 
   it "fails if info_hash is invalid" do
     get '/scrape', info_hash: 'abcd'
@@ -29,8 +29,8 @@ describe "GET /scrape" do
   end
 
   it "returns stats for all torrents" do
-    FileStore.new('1234').set_peer "abcd", ip: '42.5.4.3', port: 432, left: 9876
-    FileStore.new('5678').set_peer "efgh", ip: '22.5.4.8', port: 431, uploaded: 9876
+    PeerStore.new('1234').set_peer "abcd", ip: '42.5.4.3', port: 432, left: 9876
+    PeerStore.new('5678').set_peer "efgh", ip: '22.5.4.8', port: 431, uploaded: 9876
     get '/scrape'
     expect(last_response).to be_ok
     expect(response).to include('files' => {

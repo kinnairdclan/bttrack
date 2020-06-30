@@ -1,15 +1,18 @@
-require 'sinatra'
-require 'bencode'
-require './lib/info_hash'
-
 CONF = {
   compact_only: false,      # Only return peers in compact format
-  announce_interval: 600,   # Desired interval between announce
+  announce_interval: 120,   # Desired interval between announce
   min_interval: 60,         # Min interval between announce
   default_peers: 50,        # Default number of peers returned per announce
   max_peers: 200,           # Max number of peers returned per announce
-  db_dir: "./tmp/torrents"  # Where to store database files
+  redis_connections: 25,    # Max number of ConnectionPool connections for PeerStore
+  redis_timeout: 2,         # ConnectionPool timeout
+  redis_key_expiration: 600 #How long a key will persist in db before it is blasted away in a purfiying wind.
 }
+
+#info_hash and peer_store (loaded by info_hash) need some of dem sweet sweet config options
+require 'sinatra'
+require 'bencode'
+require './lib/info_hash'
 
 VERSION = File.read('VERSION')
 
@@ -35,7 +38,7 @@ get '/' do
 end
 
 get %r{/([0-9a-f]{40})} do
-  @store = FileStore.new params[:captures].pack('H*')
+  @store = PeerStore.new params[:captures].pack('H*')
   @tr = request.url.gsub /#{@store.info_hash.unpack('H*')[0]}$/, 'announce'
   erb :show
 end

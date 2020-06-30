@@ -1,5 +1,5 @@
 require 'ipaddr'
-require './lib/file_store'
+require './lib/peer_store'
 
 class InfoHash
   def initialize id
@@ -40,13 +40,8 @@ class InfoHash
   end
 
   def self.all
-    #Enumerator.new do |enum|
-      #Pathname.glob("#{CONF[:db_dir]}/*.pstore").each do |path|
-        #enum.yield [path.basename('.pstore').to_s].pack('H*')
-      #end
-    #end
     Enumerator.new do |enum|
-      FileStore.all do |info_hash|
+      PeerStore.all do |info_hash|
         enum.yield info_hash
       end
     end
@@ -56,14 +51,14 @@ class InfoHash
   def self.scrape
     defaults = {'downloaded' => 0, 'complete' => 0, 'incomplete' => 0}
     {:files => InfoHash.all.each_with_object({}) do |info_hash, stats|
-      stats[info_hash] = defaults.merge(FileStore.new(info_hash).get_stats)
+      stats[info_hash] = defaults.merge(PeerStore.new(info_hash).get_stats)
     end}
   end
 
   private
 
   def store
-    @store ||= FileStore.new(@id)
+    @store ||= PeerStore.new(@id)
   end
 
 end

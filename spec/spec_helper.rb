@@ -3,8 +3,6 @@ require 'rack/test'
 require 'fileutils'
 require './bttrack'
 
-CONF[:db_dir] = 'tmp/test'
-
 module RSpecMixin
   include Rack::Test::Methods
   def app() Sinatra::Application end
@@ -14,6 +12,6 @@ end
 RSpec.configure do |c|
   c.include RSpecMixin
 
-  c.before(:each) { FileStore.purge! }
-  c.after(:suite) { FileStore.purge! }
+  c.before(:each) { PeerStore.purge! }
+  c.after(:suite) { PeerStore.purge! }
 end

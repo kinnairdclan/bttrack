@@ -3,7 +3,7 @@
 
 <header>
   <a href="/">bttrack</a> » <code>
-    <a href="magnet:?xt=urn:btih:<%=  @store.info_hash.unpack('H*')[0] %>&tr=<%= @tr %>" title="Magnet URI"><%= @store.info_hash.unpack('H*')[0] %></a>
+    <a href="magnet:?xt=urn:btih:<%=  @store.info_hash %>&tr=<%= @tr %>" title="Magnet URI"><%= @store.info_hash %></a>
   </code>
   <% if size and size > 0 %>(<%= size_format(size) %>)<% end %>
 </header>
@@ -21,7 +21,7 @@
     <% peers.each do |peer_id, peer| %>
       <tr>
         <td>
-          <code><%= peer_id.unpack('H*')[0] %></code>
+          <code><%= peer_id %></code>
         </td>
         <td>
           <%= peer['ip'] %>:<%= peer['port'] %>
