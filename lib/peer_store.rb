@@ -100,7 +100,6 @@ class PeerStore
   def clean_and_denorm!(exist_conn)
     count = 0
     store = exist_conn.hgetall(@info_hash)
-    exist_conn.expire(@info_hash, CONF[:redis_key_expiration])
     if peers = store['peers']
       peers = JSON.parse(peers)
       peers.delete_if { |id, peer| Time.parse(peer['expires_at']) < Time.now }
@@ -110,6 +109,7 @@ class PeerStore
       store['stats']['incomplete'] = peers.count { |_, p| p['left'].to_i != 0 }
       exist_conn.hset(@info_hash, 'stats', store['stats'].to_json)
       exist_conn.hset(@info_hash, 'peers', peers.to_json)
+      exist_conn.expire(@info_hash, CONF[:redis_key_expiration])
       count = peers.size
     else
       count = 0
