@@ -24,12 +24,12 @@ class InfoHash
 
   # updates peer's details
   def event! params
-    if params["event"] == 'stopped'
+    if params['event'] == 'stopped'
       store.delete_peer params['peer_id']
     else
-      store.set_peer params['peer_id'], ip: params["ip"],
-        downloaded: params["downloaded"].to_i, uploaded: params["uploaded"].to_i,
-        left: params["left"].to_i, port: params["port"].to_i
+      store.set_peer params['peer_id'], ip: params['ip'],
+        downloaded: params['downloaded'].to_i, uploaded: params['uploaded'].to_i,
+        left: params['left'].to_i, port: params['port'].to_i
     end
   end
 
@@ -40,9 +40,14 @@ class InfoHash
   end
 
   def self.all
+    #Enumerator.new do |enum|
+      #Pathname.glob("#{CONF[:db_dir]}/*.pstore").each do |path|
+        #enum.yield [path.basename('.pstore').to_s].pack('H*')
+      #end
+    #end
     Enumerator.new do |enum|
-      Pathname.glob("#{CONF[:db_dir]}/*.pstore").each do |path|
-        enum.yield [path.basename('.pstore').to_s].pack('H*')
+      FileStore.all do |info_hash|
+        enum.yield info_hash
       end
     end
   end

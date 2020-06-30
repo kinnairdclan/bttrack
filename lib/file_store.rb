@@ -94,6 +94,13 @@ class FileStore
   #  @file_path
   #end
 
+  def self.all
+    redis = Redis.new
+    redis.keys.each do |key|
+      yield [key].pack('H*')
+    end
+  end
+
   def self.purge!
     #FileUtils.rm_r CONF[:db_dir], force: true
     redis = Redis.new
