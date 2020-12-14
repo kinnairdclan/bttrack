@@ -5,7 +5,7 @@ require 'connection_pool'
 
 class PeerStore
   attr_reader :info_hash
-  @@connection_pool = ConnectionPool.new(size: CONF[:redis_connections], timeout: CONF[:redis_timeout]) { Redis.new }
+  @@connection_pool = ConnectionPool.new(size: CONF[:redis_connections], timeout: CONF[:redis_timeout]) { Redis.new(host: CONF[:redis_host]) }
 
   def initialize info_hash
     @info_hash = info_hash.unpack('H*').first

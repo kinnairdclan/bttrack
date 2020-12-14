@@ -6,7 +6,8 @@ CONF = {
   max_peers: 200,           # Max number of peers returned per announce
   redis_connections: 25,    # Max number of ConnectionPool connections for PeerStore
   redis_timeout: 2,         # ConnectionPool timeout
-  redis_key_expiration: 600 #How long a key will persist in db before it is blasted away in a purfiying wind.
+  redis_key_expiration: 600, #How long a key will persist in db before it is blasted away in a purfiying wind.
+  redis_host: 'redis'
 }
 
 #info_hash and peer_store (loaded by info_hash) need some of dem sweet sweet config options

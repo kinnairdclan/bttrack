@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:6
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+  web:
+    build: .
+    volumes:
+      - .:/usr/src/app:cached
+    command: ["bundle", "exec", "rackup", "-o", "0.0.0.0"]
+    ports:
+      - "9292:9292"
+    depends_on:
+      - redis
+volumes:
+  redis-data:
